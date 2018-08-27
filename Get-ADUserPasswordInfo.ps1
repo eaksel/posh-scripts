@@ -13,13 +13,13 @@ function Get-ADUserPasswordInfo {
     param(
         [string]$SearchBase
     )
-    BEGIN {
+    begin {
         if (! $SearchBase) {
             $SearchBase = GenerateSearchBase
         }
     }
-    PROCESS {
-        Get-ADUser -SearchBase $SearchBase -Filter "Enabled -eq '$True'" -Properties * | Select-Object CN, PasswordExpired, PasswordLastSet, LastLogonDate | Sort-Object CN
+    process {
+        Get-ADUser -SearchBase $SearchBase -Filter "Enabled -eq '$True'" -Properties * | Select-Object CN, PasswordExpired, PasswordLastSet, LastLogonDate, AccountExpirationDate, Enabled, LockedOut | Sort-Object CN
     }
-    END {}
+    end {}
 }

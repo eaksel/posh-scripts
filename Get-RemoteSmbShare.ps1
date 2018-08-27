@@ -21,7 +21,7 @@ function Get-RemoteSmbShare {
         [ValidateCount(1, 5)]
         [string[]]$ComputerName,
         
-        [string]$ErrorFile = (Join-Path -Path ([Environment]::GetFolderPath('Desktop')) -ChildPath "$(Get-Date -Format 'yyyy-MM-dd_HH-mm') - Error Log.log")
+        [string]$LogFile = (Join-Path -Path ([Environment]::GetFolderPath('Desktop')) -ChildPath "Get-RemoteSmbShare - $(Get-Date -Format 'yyyy-MM-dd_HH-mm').log")
     )
     
     begin {
@@ -38,16 +38,20 @@ function Get-RemoteSmbShare {
                 $ComputerOK = $False
                 Write-Warning "$Computer : Error while getting info."
                 Write-Warning "$Computer : $_.Exception.Message"
-                $Computer | Out-File $ErrorFile -Append
+                $Computer | Out-File $LogFile -Append
             }
             if ($ComputerOK) {
-                $props = [Ordered]@{'ComputerName' = $Computer;
-                    'SmbShares'           = $smbshares.Name;
-                    'Paths'               = $smbshares.Path;
-                    'Description'         = $smbshares.Description
+                foreach ($smbshare in $smbshares) {
+                    
+                    $SMBprops = [Ordered]@{
+                        'ComputerName' = $Computer;
+                        'SmbShare'    = $smbshare.Name;
+                        'Path'        = $smbshare.Path;
+                        'Description'  = $smbshare.Description
+                    }
+                    $SMBobj = New-Object -TypeName PSObject -Property $SMBprops
+                    Write-Output $SMBobj
                 }
-                $obj = New-Object -TypeName PSObject -Property $props
-                Write-Output $obj
             }
         }
     }
@@ -56,4 +60,6 @@ function Get-RemoteSmbShare {
     }
 }
 
-Get-RemoteSmbShare -computer $env:COMPUTERNAME, localhost
+If ((Resolve-Path -Path $MyInvocation.InvocationName).ProviderPath -eq $MyInvocation.MyCommand.Path) {
+    Get-RemoteSmbShare
+}

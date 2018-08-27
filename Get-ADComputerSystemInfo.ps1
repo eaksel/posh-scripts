@@ -22,7 +22,7 @@ function Get-ADComputerSystemInfo {
         [string]$LogFile = (Join-Path -Path ([Environment]::GetFolderPath('Desktop')) -ChildPath "Get-ADComputerSystemInfo - $(Get-Date -Format 'yyyy-MM-dd').csv")
     )
     
-    BEGIN {
+    begin {
         if (! $SearchBase) {
             $SearchBase = GenerateSearchBase
         }
@@ -49,7 +49,7 @@ function Get-ADComputerSystemInfo {
         $counter = 0
     }
 
-    PROCESS {
+    process {
         foreach ($Computer in $WindowsComputers) {
             $counter += 1
 
@@ -112,7 +112,7 @@ function Get-ADComputerSystemInfo {
             }
         }
     }
-    END {
+    end {
         Write-Verbose "$($Successful.count) hosts were tested successfully."
         Write-Verbose ("-" * 60)
         Write-Verbose "$($CimError.count) hosts wouldn't accept Cim requests or were offline."
@@ -122,4 +122,6 @@ function Get-ADComputerSystemInfo {
     }
 }
 
-Get-ADComputerSystemInfo
+If ((Resolve-Path -Path $MyInvocation.InvocationName).ProviderPath -eq $MyInvocation.MyCommand.Path) {
+    Get-ADComputerSystemInfo
+}

@@ -14,15 +14,15 @@ function Get-ADComputerInactivity {
     param(
         [string]$SearchBase
     )
-    BEGIN {
+    begin {
         if (! $SearchBase) {
             $SearchBase = GenerateSearchBase
         }
     }
-    PROCESS {
+    process {
         Get-ADComputer -SearchBase $SearchBase -Filter "Enabled -eq '$True'" -Properties LastLogonDate | Sort-Object LastLogonDate | Select-Object DNSHostName, LastLogonDate, @{N = "Inactivity (D)"; E = {((Get-date) - $_.LastLogonDate).days}}
     }
-    END {
+    end {
     }
 }
 

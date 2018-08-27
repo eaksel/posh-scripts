@@ -16,17 +16,15 @@ function Get-NetworkInfoWMI {
     param (
         [string]$SearchBase,
 
-        [switch]$LogErrors,
+        [switch]$LogToFile,
 
-        [string]$ErrorLog = (Join-Path -Path ([Environment]::GetFolderPath('Desktop')) -ChildPath "$(Get-Date -Format 'yyyy-MM-dd_HH-mm') - Error Log.log")
+        [string]$LogFile = (Join-Path -Path ([Environment]::GetFolderPath('Desktop')) -ChildPath "Get-NetworkInfoWMI - $(Get-Date -Format 'yyyy-MM-dd_HH-mm').log")
     )
     
     begin {
         if (! $SearchBase) {
             $SearchBase = GenerateSearchBase
         }
-
-        Write-Verbose "The ErrorLog file will be saved as : $ErrorLog"
 
         $CheckFail = @()
         $InfoOK = @()
@@ -74,23 +72,27 @@ function Get-NetworkInfoWMI {
     }
     
     end {
-        if ($LogErrors) {
-            "Summary for $($WindowsComputers.count) computers:" | Out-File -FilePath $ErrorLog -Append
-            '' | Out-File -FilePath $ErrorLog -Append
+        if ($LogToFile) {
+            Write-Verbose "The LogFile file will be saved as : $LogFile"
+            
+            "Summary for $($WindowsComputers.count) computers:" | Out-File -FilePath $LogFile -Append
+            '' | Out-File -FilePath $LogFile -Append
 
-            "Gathered WMI informations from $($InfoOK.count) computers:" | Out-File -FilePath $ErrorLog -Append
-            $InfoOK -join (', ') |Out-File -FilePath $ErrorLog -Append
-            '' | Out-File -FilePath $ErrorLog -Append
+            "Gathered WMI informations from $($InfoOK.count) computers:" | Out-File -FilePath $LogFile -Append
+            $InfoOK -join (', ') |Out-File -FilePath $LogFile -Append
+            '' | Out-File -FilePath $LogFile -Append
 
-            "Couldn't gather WMI informations from $($CheckFail.count) computers:" | Out-File -FilePath $ErrorLog -Append
-            $CheckFail -join (', ') | Out-File -FilePath $ErrorLog -Append
-            '' |Out-File -FilePath $ErrorLog -Append
+            "Couldn't gather WMI informations from $($CheckFail.count) computers:" | Out-File -FilePath $LogFile -Append
+            $CheckFail -join (', ') | Out-File -FilePath $LogFile -Append
+            '' |Out-File -FilePath $LogFile -Append
 
-            "Unable to connect to $($OffComputers.count) computers:" | Out-File -FilePath $ErrorLog -Append
-            $OffComputers -join (', ') | Out-File -FilePath $ErrorLog -Append
-            '' | Out-File -FilePath $ErrorLog -Append
+            "Unable to connect to $($OffComputers.count) computers:" | Out-File -FilePath $LogFile -Append
+            $OffComputers -join (', ') | Out-File -FilePath $LogFile -Append
+            '' | Out-File -FilePath $LogFile -Append
         }
     }
 }
 
-Get-NetworkInfoWMI -Verbose | Format-Table -AutoSize
+If ((Resolve-Path -Path $MyInvocation.InvocationName).ProviderPath -eq $MyInvocation.MyCommand.Path) {
+    Get-NetworkInfoWMI
+}

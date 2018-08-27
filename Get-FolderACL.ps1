@@ -4,14 +4,12 @@ function Get-FolderACL {
         [Parameter(Mandatory, HelpMessage="Enter a path (Ex: D:\Share)")]
         [string]$ParentFolder,
         
-        [switch]$LogErrors,
+        [switch]$LogToFile,
 
-        [string]$ErrorLog = (Join-Path -Path ([Environment]::GetFolderPath('Desktop')) -ChildPath "Get-FolderACL - $(Get-Date -Format 'yyyy-MM-dd_HH-mm').log")
+        [string]$LogFile = (Join-Path -Path ([Environment]::GetFolderPath('Desktop')) -ChildPath "Get-FolderACL - $(Get-Date -Format 'yyyy-MM-dd_HH-mm').log")
     )
     
     begin {
-        Write-Verbose "The ErrorLog file will be saved as : $ErrorLog"
-
         $CheckFail = @()
         $InfoOK = @()
 
@@ -57,17 +55,23 @@ function Get-FolderACL {
     }
     
     end {
-        if ($LogErrors) {
-            "Summary for $($FolderCount) folders:" | Out-File -FilePath $ErrorLog -Append
-            '' | Out-File -FilePath $ErrorLog -Append
-            "Gathered folder ACLs from $($InfoOK.count) folders:" | Out-File -FilePath $ErrorLog -Append
-            $InfoOK -join (', ') | Out-File -FilePath $ErrorLog -Append
-            '' | Out-File -FilePath $ErrorLog -Append
-            "Couldn't gather folder ACLs from $($CheckFail.count) folders:" | Out-File -FilePath $ErrorLog -Append
-            $CheckFail -join (', ') | Out-File -FilePath $ErrorLog -Append
-            '' |Out-File -FilePath $ErrorLog -Append
+        if ($LogToFile) {
+            Write-Verbose "The LogFile will be saved as : $LogFile"
+
+            "Summary for $($FolderCount) folders:" | Out-File -FilePath $LogFile -Append
+            '' | Out-File -FilePath $LogFile -Append
+
+            "Gathered folder ACLs from $($InfoOK.count) folders:" | Out-File -FilePath $LogFile -Append
+            $InfoOK -join (', ') | Out-File -FilePath $LogFile -Append
+            '' | Out-File -FilePath $LogFile -Append
+            
+            "Couldn't gather folder ACLs from $($CheckFail.count) folders:" | Out-File -FilePath $LogFile -Append
+            $CheckFail -join (', ') | Out-File -FilePath $LogFile -Append
+            '' |Out-File -FilePath $LogFile -Append
         }
     }
 }
 
-Get-FolderACL -ParentFolder C:\ -Verbose | Select-Object -ExpandProperty ACLs | ConvertTo-Csv
+If ((Resolve-Path -Path $MyInvocation.InvocationName).ProviderPath -eq $MyInvocation.MyCommand.Path) {
+    Get-FolderACL
+}

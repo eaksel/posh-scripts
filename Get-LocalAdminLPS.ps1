@@ -1,7 +1,7 @@
 function Get-LocalAdminLPS {
     [CmdletBinding()]
     param (
-        [Parameter(ValueFromPipeline)]
+        [Parameter(Mandatory, ValueFromPipeline)]
         [string[]]$ComputerName
     )
     
@@ -34,4 +34,6 @@ function Get-LocalAdminLPS {
     }
 }
 
-Get-LocalAdminLPS -ComputerName $env:COMPUTERNAME, localhost, $env:COMPUTERNAME | ft
+If ((Resolve-Path -Path $MyInvocation.InvocationName).ProviderPath -eq $MyInvocation.MyCommand.Path) {
+    Get-LocalAdminLPS
+}

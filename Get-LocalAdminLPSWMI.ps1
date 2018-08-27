@@ -1,7 +1,7 @@
 function Get-LocalAdminLPSWMI {
     [CmdletBinding()]
     param (
-        [Parameter(ValueFromPipeline)]
+        [Parameter(Mandatory, ValueFromPipeline)]
         [string[]]$ComputerName
     )
     
@@ -33,4 +33,6 @@ function Get-LocalAdminLPSWMI {
     }
 }
 
-Get-LocalAdminLPSWMI -ComputerName $env:COMPUTERNAME, localhost, $env:COMPUTERNAME | ft
+If ((Resolve-Path -Path $MyInvocation.InvocationName).ProviderPath -eq $MyInvocation.MyCommand.Path) {
+    Get-LocalAdminLPSWMI
+}
